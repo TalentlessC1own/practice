@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using practice.Model;
+using Spire.Pdf.OPC;
 
 namespace practice
 {
@@ -20,12 +21,14 @@ namespace practice
         string Step { get; set; }
         string[] TimeMassive{ get; set; }
         string[] AConcentrationMassive { get; set; }
+        Image GrImage { get; }
+        string FilePath { get; set; }
 
         void ModelChartDraw(DrawData drawData);
         void ExperimentChartDraw(DrawData drawData);
          void ClearDataGrid();
 
-        Image Image { get; }
+       
         void ModelChartClear();
         void ExperimentChartClear();
         event EventHandler ModelChartTryDraw;
@@ -131,8 +134,8 @@ namespace practice
                 this.Refresh();
             }
         }
-        public string FilePath => throw new NotImplementedException();
-        public Image Image => throw new NotImplementedException();
+        public string FilePath { get; set; }
+       
 
 
         public event EventHandler ModelChartTryDraw;
@@ -155,10 +158,26 @@ namespace practice
             }
         }
 
+
+        public Image GrImage
+        {
+            get
+            {
+                Bitmap bmp = new Bitmap(ExperimentChart.Width, ExperimentChart.Height);
+
+                // вызываем метод DrawToBitmap для элемента управления Chart и передаем ему созданный Bitmap
+                ExperimentChart.DrawToBitmap(bmp, new Rectangle(0, 0, ExperimentChart.Width, ExperimentChart.Height));
+                bmp.Save("ImgData.png", System.Drawing.Imaging.ImageFormat.Png);
+                return bmp;
+            }
+        }
+
         public void ClearDataGrid()
         {
             experimentDataGridView.Rows.Clear();
         }
+
+        public Image Image { get; }
 
         public void ModelChartDraw(DrawData drawData)
         {
@@ -215,6 +234,23 @@ namespace practice
         private void button5_Click(object sender, EventArgs e)
         {
             TryAnal?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void сохранитьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.OverwritePrompt = true;
+            dialog.Filter = "Xlsx|*.xlsx";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                FilePath = dialog.FileName;
+            }
+            else
+            {
+                FilePath = "";
+            }
+            if (FilePath != "") SaveData?.Invoke(this, EventArgs.Empty);
+           
         }
     }
 }
